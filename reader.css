@@ -1,0 +1,31 @@
+body{
+
+margin:0;
+
+background:#111;
+
+}
+
+
+
+.reader{
+
+width:900px;
+
+margin:0 auto;
+
+}
+
+
+
+.reader img{
+
+width:100%;
+
+height:auto;
+
+display:block;
+
+margin-bottom:30px;
+
+}
