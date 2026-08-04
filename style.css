@@ -2,6 +2,7 @@ html,
 body{
 
 margin:0;
+
 width:100%;
 height:100%;
 
@@ -10,7 +11,6 @@ overflow:hidden;
 background:#000;
 
 }
-
 
 
 canvas{
@@ -24,7 +24,7 @@ display:block;
 
 
 
-#hint{
+.tip{
 
 position:absolute;
 
@@ -38,9 +38,9 @@ color:white;
 
 font-size:12px;
 
-letter-spacing:4px;
+letter-spacing:5px;
 
-opacity:.5;
+opacity:.6;
 
 font-family:Arial;
 
