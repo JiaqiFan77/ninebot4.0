@@ -1,32 +1,36 @@
 import * as THREE from
 "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js";
 
-
 import { gsap }
 from
 "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js";
 
 
 
-const canvas=document.querySelector("#webgl");
+const canvas =
+document.querySelector("#webgl");
 
 
 
-const scene=new THREE.Scene();
+const scene =
+new THREE.Scene();
 
 
-scene.background=
+scene.background =
 new THREE.Color(0x000000);
 
 
 
 
-const camera=
+
+// 相机
+
+const camera =
 new THREE.PerspectiveCamera(
 
 45,
 
-innerWidth/innerHeight,
+innerWidth / innerHeight,
 
 0.1,
 
@@ -35,12 +39,19 @@ innerWidth/innerHeight,
 );
 
 
-camera.position.z=10;
+camera.position.set(
+0,
+0,
+10
+);
 
 
 
 
-const renderer=
+
+// 渲染器
+
+const renderer =
 new THREE.WebGLRenderer({
 
 canvas,
@@ -51,11 +62,8 @@ antialias:true
 
 
 renderer.setSize(
-
 innerWidth,
-
 innerHeight
-
 );
 
 
@@ -68,8 +76,10 @@ Math.min(devicePixelRatio,2)
 
 
 
-const group=
+
+const group =
 new THREE.Group();
+
 
 scene.add(group);
 
@@ -77,6 +87,8 @@ scene.add(group);
 
 
 
+
+// 图片
 
 const covers=[
 
@@ -92,27 +104,27 @@ const covers=[
 
 
 
+
 // A2双页比例
 
-const ratio=840/594;
-
-
-const height=3.8;
-
-const width=
-height*ratio;
+const ratio = 840 / 594;
 
 
 
+const height = 2.8;
+
+const width =
+height * ratio;
 
 
 
-const loader=
+
+
+const loader =
 new THREE.TextureLoader();
 
 
 let posters=[];
-
 
 let active=null;
 
@@ -121,21 +133,22 @@ let active=null;
 
 
 
+// 队列位置
+
 const positions=[
 
 
-[0,1.6,0],
+[-2.5,0,0],
 
-[0,1,-1],
+[-1.5,0,-0.8],
 
-[0,.4,-2],
+[-0.5,0,-1.6],
 
-[0,-.2,-3],
+[0.5,0,-2.4],
 
-[0,-.8,-4],
+[1.5,0,-3.2],
 
-[0,-1.4,-5]
-
+[2.5,0,-4]
 
 ];
 
@@ -144,25 +157,25 @@ const positions=[
 
 
 
-
 covers.forEach(
 
-(img,i)=>{
+(file,index)=>{
 
 
-const texture=
+const texture =
 loader.load(
-"images/"+img
+"images/"+file
 );
 
 
-texture.colorSpace=
+texture.colorSpace =
 THREE.SRGBColorSpace;
 
 
 
 
-const geo=
+
+const geometry =
 new THREE.PlaneGeometry(
 
 width,
@@ -174,7 +187,7 @@ height
 
 
 
-const mat=
+const material =
 new THREE.MeshBasicMaterial({
 
 map:texture,
@@ -185,51 +198,58 @@ side:THREE.DoubleSide
 
 
 
-const mesh=
+
+
+const mesh =
 new THREE.Mesh(
 
-geo,
+geometry,
 
-mat
+material
 
 );
+
 
 
 
 
 mesh.position.set(
 
-positions[i][0],
+positions[index][0],
 
-positions[i][1],
+positions[index][1],
 
-positions[i][2]
+positions[index][2]
 
 );
 
 
 
 
+// 队列倾斜
 
-mesh.rotation.y=-0.15;
+mesh.rotation.y =
+-0.35;
+
 
 
 
 mesh.userData={
 
-index:i,
+index:index,
 
 home:{
 
-x:positions[i][0],
+x:positions[index][0],
 
-y:positions[i][1],
+y:positions[index][1],
 
-z:positions[i][2]
+z:positions[index][2]
 
 }
 
 };
+
 
 
 
@@ -252,17 +272,15 @@ posters.push(mesh);
 
 
 
-// 点击检测
 
+// 点击
 
-const raycaster=
+const raycaster =
 new THREE.Raycaster();
 
 
-const mouse=
+const mouse =
 new THREE.Vector2();
-
-
 
 
 
@@ -270,40 +288,47 @@ window.addEventListener(
 
 "click",
 
-e=>{
+(e)=>{
 
 
-mouse.x=
-(e.clientX/innerWidth)*2-1;
+mouse.x =
+(e.clientX / innerWidth)*2-1;
 
 
-mouse.y=
--(e.clientY/innerHeight)*2+1;
+mouse.y =
+-(e.clientY / innerHeight)*2+1;
 
 
 
 raycaster.setFromCamera(
+
 mouse,
+
 camera
+
 );
 
 
 
-const hit=
+const result =
 raycaster.intersectObjects(
 posters
 );
 
 
 
-if(hit.length){
+if(result.length){
 
-extract(hit[0].object);
+extract(
+result[0].object
+);
 
 }
 
 
 });
+
+
 
 
 
@@ -325,6 +350,9 @@ active=poster;
 
 
 
+
+// 其他封面退后
+
 posters.forEach(
 
 p=>{
@@ -339,24 +367,29 @@ p.position,
 
 {
 
-z:p.userData.home.z-3,
+z:-8,
 
-duration:1
+duration:1,
 
-}
-
-);
-
-
-}
+ease:"power3.out"
 
 }
 
 );
 
 
+}
 
 
+}
+
+);
+
+
+
+
+
+// 抽出
 
 gsap.to(
 
@@ -400,13 +433,11 @@ duration:1
 
 
 
-// 第六期进入阅读
 
+// 第六期打开阅读
 
 if(
-
 poster.userData.index===5
-
 ){
 
 
@@ -418,6 +449,7 @@ window.location.href=
 
 
 },1200);
+
 
 
 }
@@ -436,10 +468,9 @@ window.location.href=
 
 // 鼠标视差
 
+let mouseX=0;
 
-let mx=0;
-
-let my=0;
+let mouseY=0;
 
 
 
@@ -447,18 +478,20 @@ window.addEventListener(
 
 "mousemove",
 
-e=>{
+(e)=>{
 
 
-mx=
+mouseX =
 (e.clientX/innerWidth-.5);
 
 
-my=
+mouseY =
 (e.clientY/innerHeight-.5);
 
 
-});
+}
+
+);
 
 
 
@@ -469,35 +502,46 @@ my=
 function animate(){
 
 
-requestAnimationFrame(animate);
+requestAnimationFrame(
+animate
+);
 
 
 
 group.rotation.y +=
 
-(mx*0.25-group.rotation.y)
-*0.03;
+(
+mouseX*0.25 -
+group.rotation.y
+)
+*0.04;
 
 
 
 group.rotation.x +=
 
-(-my*0.15-group.rotation.x)
-*0.03;
+(
+-mouseY*0.15 -
+group.rotation.x
+)
+*0.04;
 
 
 
 renderer.render(
+
 scene,
+
 camera
+
 );
+
 
 
 }
 
 
 animate();
-
 
 
 
@@ -512,11 +556,12 @@ window.addEventListener(
 ()=>{
 
 
-camera.aspect=
+camera.aspect =
 innerWidth/innerHeight;
 
 
 camera.updateProjectionMatrix();
+
 
 
 renderer.setSize(
@@ -526,6 +571,7 @@ innerWidth,
 innerHeight
 
 );
+
 
 
 });
