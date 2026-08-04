@@ -1,10 +1,6 @@
 import * as THREE from
 "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js";
 
-import { gsap }
-from
-"https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js";
-
 
 
 const canvas =
@@ -23,14 +19,12 @@ new THREE.Color(0x000000);
 
 
 
-// camera
-
 const camera =
 new THREE.PerspectiveCamera(
 
 45,
 
-innerWidth / innerHeight,
+innerWidth/innerHeight,
 
 0.1,
 
@@ -39,18 +33,13 @@ innerWidth / innerHeight,
 );
 
 
-camera.position.set(
-0,
-0,
-18
-);
+
+camera.position.z=16;
 
 
 
 
 
-
-// renderer
 
 const renderer =
 new THREE.WebGLRenderer({
@@ -63,14 +52,20 @@ antialias:true
 
 
 renderer.setSize(
+
 innerWidth,
+
 innerHeight
+
 );
 
 
 renderer.setPixelRatio(
+
 Math.min(devicePixelRatio,2)
+
 );
+
 
 
 
@@ -80,7 +75,6 @@ Math.min(devicePixelRatio,2)
 const group =
 new THREE.Group();
 
-
 scene.add(group);
 
 
@@ -88,9 +82,8 @@ scene.add(group);
 
 
 
-// 图片
 
-const covers=[
+const files=[
 
 "cover01.jpg",
 "cover02.jpg",
@@ -105,18 +98,18 @@ const covers=[
 
 
 
+
 // A2 双页比例
 
 const ratio =
-840 / 594;
+840/594;
 
 
 
-const height = 3;
+const h=3;
 
 
-const width =
-height * ratio;
+const w=h*ratio;
 
 
 
@@ -127,50 +120,50 @@ new THREE.TextureLoader();
 
 
 
-let posters=[];
-
-let active=null;
 
 
 
-
-
-
-// 队列
-
-const positions=[
-
-
-[-5,0,0],
-
-[-3,0,-1],
-
-[-1,0,-2],
-
-[1,0,-3],
-
-[3,0,-4],
-
-[5,0,-5]
-
-
-];
-
-
-
-
-
-
-
-covers.forEach(
+files.forEach(
 
 (file,index)=>{
 
 
+console.log(
+"loading:",
+file
+);
+
+
+
 const texture =
 loader.load(
-"images/"+file
+
+"images/"+file,
+
+()=>{
+
+console.log(
+"success:",
+file
 );
+
+},
+
+undefined,
+
+()=>{
+
+console.log(
+"error:",
+file
+);
+
+}
+
+);
+
+
+
 
 
 texture.colorSpace =
@@ -180,14 +173,16 @@ THREE.SRGBColorSpace;
 
 
 
+
 const geometry =
 new THREE.PlaneGeometry(
 
-width,
+w,
 
-height
+h
 
 );
+
 
 
 
@@ -206,7 +201,9 @@ side:THREE.DoubleSide
 
 
 
-const poster =
+
+
+const mesh =
 new THREE.Mesh(
 
 geometry,
@@ -219,51 +216,29 @@ material
 
 
 
-poster.position.set(
+// 明显错开
 
-positions[index][0],
+mesh.position.set(
 
-positions[index][1],
+(index-2.5)*3,
 
-positions[index][2]
+0,
+
+-index*0.5
 
 );
 
 
 
 
+// 轻微旋转
 
-// 队列倾斜
-
-poster.rotation.y=-0.25;
-
-
-
-
-poster.userData={
-
-index:index,
-
-home:{
-
-x:positions[index][0],
-
-y:positions[index][1],
-
-z:positions[index][2]
-
-}
-
-};
+mesh.rotation.y=-0.3;
 
 
 
 
-
-group.add(poster);
-
-
-posters.push(poster);
+group.add(mesh);
 
 
 
@@ -277,206 +252,7 @@ posters.push(poster);
 
 
 
-
-
-// 点击
-
-const raycaster =
-new THREE.Raycaster();
-
-
-const mouse =
-new THREE.Vector2();
-
-
-
-
-window.addEventListener(
-
-"click",
-
-(e)=>{
-
-
-mouse.x =
-(e.clientX/innerWidth)*2-1;
-
-
-mouse.y =
--(e.clientY/innerHeight)*2+1;
-
-
-
-raycaster.setFromCamera(
-
-mouse,
-
-camera
-
-);
-
-
-
-const hit =
-raycaster.intersectObjects(
-posters
-);
-
-
-
-if(hit.length){
-
-extract(hit[0].object);
-
-}
-
-
-});
-
-
-
-
-
-
-
-
-
-function extract(poster){
-
-
-if(active){
-
-return;
-
-}
-
-
-active=poster;
-
-
-
-
-
-// 其他退后
-
-posters.forEach(
-
-p=>{
-
-
-if(p!==poster){
-
-
-gsap.to(
-
-p.position,
-
-{
-
-z:-6,
-
-duration:1,
-
-ease:"power3.out"
-
-}
-
-);
-
-
-}
-
-}
-
-);
-
-
-
-
-
-
-// 抽出
-
-gsap.to(
-
-poster.position,
-
-{
-
-x:0,
-
-y:0,
-
-z:5,
-
-duration:1.2,
-
-ease:"power4.out"
-
-}
-
-);
-
-
-
-
-
-gsap.to(
-
-poster.rotation,
-
-{
-
-x:0,
-
-y:0,
-
-duration:1
-
-}
-
-);
-
-
-
-
-
-
-
-// 第六期阅读
-
-if(
-
-poster.userData.index===5
-
-){
-
-
-setTimeout(()=>{
-
-
-window.location.href=
-"reader.html";
-
-
-},1200);
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-
-// 鼠标空间感
+// 鼠标视差
 
 let mx=0;
 
@@ -499,9 +275,9 @@ my=
 (e.clientY/innerHeight-.5);
 
 
-});
+}
 
-
+);
 
 
 
@@ -518,23 +294,19 @@ animate
 
 
 
-
 group.rotation.y +=
 
 (
-mx*0.2-group.rotation.y
-)
-*0.03;
+mx*0.3-group.rotation.y
+)*0.03;
 
 
 
 group.rotation.x +=
 
 (
--my*0.1-group.rotation.x
-)
-*0.03;
-
+-my*0.15-group.rotation.x
+)*0.03;
 
 
 
@@ -552,8 +324,8 @@ camera
 }
 
 
-animate();
 
+animate();
 
 
 
