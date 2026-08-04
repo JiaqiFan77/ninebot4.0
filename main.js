@@ -23,7 +23,7 @@ new THREE.Color(0x000000);
 
 
 
-// 相机
+// camera
 
 const camera =
 new THREE.PerspectiveCamera(
@@ -42,14 +42,15 @@ innerWidth / innerHeight,
 camera.position.set(
 0,
 0,
-10
+18
 );
 
 
 
 
 
-// 渲染器
+
+// renderer
 
 const renderer =
 new THREE.WebGLRenderer({
@@ -70,7 +71,6 @@ innerHeight
 renderer.setPixelRatio(
 Math.min(devicePixelRatio,2)
 );
-
 
 
 
@@ -105,13 +105,15 @@ const covers=[
 
 
 
-// A2双页比例
+// A2 双页比例
 
-const ratio = 840 / 594;
+const ratio =
+840 / 594;
 
 
 
-const height = 2.8;
+const height = 3;
+
 
 const width =
 height * ratio;
@@ -124,6 +126,7 @@ const loader =
 new THREE.TextureLoader();
 
 
+
 let posters=[];
 
 let active=null;
@@ -133,24 +136,26 @@ let active=null;
 
 
 
-// 队列位置
+// 队列
 
 const positions=[
 
 
-[-2.5,0,0],
+[-5,0,0],
 
-[-1.5,0,-0.8],
+[-3,0,-1],
 
-[-0.5,0,-1.6],
+[-1,0,-2],
 
-[0.5,0,-2.4],
+[1,0,-3],
 
-[1.5,0,-3.2],
+[3,0,-4],
 
-[2.5,0,-4]
+[5,0,-5]
+
 
 ];
+
 
 
 
@@ -187,6 +192,7 @@ height
 
 
 
+
 const material =
 new THREE.MeshBasicMaterial({
 
@@ -200,7 +206,7 @@ side:THREE.DoubleSide
 
 
 
-const mesh =
+const poster =
 new THREE.Mesh(
 
 geometry,
@@ -213,7 +219,7 @@ material
 
 
 
-mesh.position.set(
+poster.position.set(
 
 positions[index][0],
 
@@ -226,15 +232,15 @@ positions[index][2]
 
 
 
+
 // 队列倾斜
 
-mesh.rotation.y =
--0.35;
+poster.rotation.y=-0.25;
 
 
 
 
-mesh.userData={
+poster.userData={
 
 index:index,
 
@@ -254,10 +260,10 @@ z:positions[index][2]
 
 
 
-group.add(mesh);
+group.add(poster);
 
 
-posters.push(mesh);
+posters.push(poster);
 
 
 
@@ -284,6 +290,7 @@ new THREE.Vector2();
 
 
 
+
 window.addEventListener(
 
 "click",
@@ -292,11 +299,11 @@ window.addEventListener(
 
 
 mouse.x =
-(e.clientX / innerWidth)*2-1;
+(e.clientX/innerWidth)*2-1;
 
 
 mouse.y =
--(e.clientY / innerHeight)*2+1;
+-(e.clientY/innerHeight)*2+1;
 
 
 
@@ -310,18 +317,16 @@ camera
 
 
 
-const result =
+const hit =
 raycaster.intersectObjects(
 posters
 );
 
 
 
-if(result.length){
+if(hit.length){
 
-extract(
-result[0].object
-);
+extract(hit[0].object);
 
 }
 
@@ -351,7 +356,8 @@ active=poster;
 
 
 
-// 其他封面退后
+
+// 其他退后
 
 posters.forEach(
 
@@ -367,7 +373,7 @@ p.position,
 
 {
 
-z:-8,
+z:-6,
 
 duration:1,
 
@@ -380,10 +386,10 @@ ease:"power3.out"
 
 }
 
-
 }
 
 );
+
 
 
 
@@ -401,7 +407,7 @@ x:0,
 
 y:0,
 
-z:4,
+z:5,
 
 duration:1.2,
 
@@ -421,6 +427,8 @@ poster.rotation,
 
 {
 
+x:0,
+
 y:0,
 
 duration:1
@@ -434,10 +442,13 @@ duration:1
 
 
 
-// 第六期打开阅读
+
+// 第六期阅读
 
 if(
+
 poster.userData.index===5
+
 ){
 
 
@@ -451,12 +462,13 @@ window.location.href=
 },1200);
 
 
+}
+
 
 }
 
 
 
-}
 
 
 
@@ -464,13 +476,11 @@ window.location.href=
 
 
 
+// 鼠标空间感
 
+let mx=0;
 
-// 鼠标视差
-
-let mouseX=0;
-
-let mouseY=0;
+let my=0;
 
 
 
@@ -481,17 +491,17 @@ window.addEventListener(
 (e)=>{
 
 
-mouseX =
+mx=
 (e.clientX/innerWidth-.5);
 
 
-mouseY =
+my=
 (e.clientY/innerHeight-.5);
 
 
-}
+});
 
-);
+
 
 
 
@@ -508,23 +518,24 @@ animate
 
 
 
+
 group.rotation.y +=
 
 (
-mouseX*0.25 -
-group.rotation.y
+mx*0.2-group.rotation.y
 )
-*0.04;
+*0.03;
 
 
 
 group.rotation.x +=
 
 (
--mouseY*0.15 -
-group.rotation.x
+-my*0.1-group.rotation.x
 )
-*0.04;
+*0.03;
+
+
 
 
 
@@ -549,6 +560,8 @@ animate();
 
 
 
+
+
 window.addEventListener(
 
 "resize",
@@ -563,7 +576,6 @@ innerWidth/innerHeight;
 camera.updateProjectionMatrix();
 
 
-
 renderer.setSize(
 
 innerWidth,
@@ -571,7 +583,6 @@ innerWidth,
 innerHeight
 
 );
-
 
 
 });
